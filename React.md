@@ -285,3 +285,270 @@ JSX는 공식적인 JS 문법이 아니다. 바벨을 통해 개발자들이 임
 
 ## JSX 문법
 
+JSX는 편리한 문법이지만, 올바른 사용을 위해 준수해야 할 규칙이 있다.
+
+
+
+### 감싸인 요소
+
+컴포넌트에 여러 요소가 있다면 반드시 부모 요소 하나로 감싸야 한다.
+
+이유 : Virtual DOM에서 컴포넌트 변화를 감지해 낼 때 효율적으로 비교할 수 있도록 컴포넌트 내부는 하나의 DOM 트리 구조로 이루어져야 한다는 규칙이 있다.
+
+```react
+import React from 'react';
+
+function App() {
+    return (
+      <div>  // div로 감싸야 한다.
+    	<h1>Hi React!</h1>
+        <h2>Hello!</h2>
+      </div>
+    )
+}
+```
+
+
+
+리액트 v16 이상부터는 Fragment 기능을 사용할 수 있다.
+
+```react
+import React from 'react';
+
+function App() {
+    return (
+      <Fragment>  // div로 감싸야 한다.
+    	<h1>Hi React!</h1>
+        <h2>Hello!</h2>
+      </Fragment>
+    )
+}
+```
+
+또는 아래와 같은 형태로도 표현할 수 있다.
+
+```react
+import React, { Fragment } from 'react';
+
+function App() {
+    return (
+      <>  {/* div로 감싸야 한다. */} 
+    	<h1>Hi React!</h1>
+        <h2>Hello!</h2>
+      </>
+    )
+}
+```
+
+
+
+### 자바스크립트 표현
+
+JSX는 DOM 요소를 렌더링하는 기능외에도 JSX내부에 JS 표현식을 쓸 수 있다.
+
+JSX내부에서 코드를 `{ }`로 감싸면 된다.
+
+```react
+import React, { Fragment } from 'react';
+
+function App() {
+    const name = 'React';
+    return (
+      <Fragment>
+    	<h1>Hi { name }!</h1>
+        <h2>Hello!</h2>
+      </Fragment>
+    )
+}
+```
+
+
+
+### If 문 대신 조건부 연산자
+
+JSX 내부의 JS 표현식에서 if 문을 사용할 수는 없다.
+
+하지만 조건에 따라 다른 내용을 렌더링해야 할 때는 JSX 밖에서 if 문을 사용하여 사전에 값을 설정하거나, { } 안에 조건부 연산자를 사용하면 된다.
+
+조건부 연산자의 또 다른 이름은 삼항 연산자!
+
+```react
+import React from 'react';
+
+function App() {
+  const name = 'React';
+  return (
+    <div className="App">
+      {name === 'React' ? (
+        <h1>Hi {name}!</h1>
+      ) : (
+        <h1>Not React</h1>
+      )}
+      <h2>Hello!</h2>
+    </div>
+  );
+}
+
+export default App;
+```
+
+
+
+### AND 연산자(&&)를 사용한 조건부 렌더링
+
+조건부 연산자로도 아래와 같이 표현할 수 있다.
+
+```react
+import React from 'react';
+
+function App() {
+  const name = 'React';
+  return (
+    <div className="App">{name === 'React' ? (<h1>Hi {name}!</h1>) : null}
+      <h2>Hello!</h2>
+    </div>
+  );
+}
+
+export default App;
+```
+
+
+
+하지만 && 연산자를 사용하여 보다 짧은 코드로 똑같은 작업을 할 수 있다.
+
+```react
+import React from 'react';
+
+function App() {
+  const name = 'React';
+  return (
+    <div className="App">{name === 'React' && <h1>Hi {name}!</h1>}
+      <h2>Hello!</h2>
+    </div>
+  );
+}
+
+export default App;
+```
+
+> 주의 falsy한 값으로 알고 있는 숫자 '0'은 예외적으로 화면에 나타난다.
+
+
+
+### undefined를 렌더링하지 않기
+
+리액트 컴포넌트에서는 함수에서 undefined만 반환하여 렌더링하는 상황을 만들면 안 된다.
+
+아래처럼 OR(||) 연산자를 사용하여 오류를 방지할 수 있다.
+
+```react
+import React from 'react';
+
+function App() {
+  const name = undefined;
+  return (
+    name || '값이 undefined다.'
+  );
+}
+
+export default App;
+```
+
+cf) div 태그로 감싼 JSX 내부에는 undefine 렌더링은 가능하다.
+
+
+
+### 인라인 스타일링
+
+리액트에서 DOM 요소에 스타일을 적용할 때는 문자열 형태로 넣는 것이 아니라 객체 형태로 넣어야 한다.
+
+스타일 이름 중에서 `background-color` 처럼 `-` 문자가 포함되는 이름은 `-` 문자를 없애고 카멜 표기법(camelCase)로 작성해야 한다. (`backgroundColor`)
+
+```react
+import React from 'react';
+
+function App() {
+  const name = 'React';
+  const style = {
+    backgroundColor: 'black',
+    color: 'aqua',
+    fontSize: '48px',
+    fontWeight: 'bold',
+    padding: 16
+  }
+  return (
+    <div style={style}>{name}</div>
+  );
+}
+
+export default App;
+```
+
+
+
+### class 대신 className
+
+JSX에서는 class가 아닌 className으로 설정해줘야 한다.
+
+class로 CSS 클래스를 설정해도 스타일이 적용은 되지만 console 탭에 경고가 나타난다.
+
+
+
+### 꼭 닫아야 하는 태그
+
+input 태그의 경우 닫는 태그가 없다.
+
+하지만 JSX에서는 태그를 닫지 않으면 오류가 발생할 수 있다.
+
+```react
+<input> </input>
+```
+
+
+
+태그 사이에 별도의 내용이 들어가지 않는 경우에는 `self-closing` 태그 형태로 작성하면 된다.
+
+```react
+<input />
+```
+
+
+
+### 주석
+
+JSX 내부에서 주석을 작성할 때는 `{/* ... */ }`와 같은 형식으로 작성한다.
+
+만약 일반 JS에서 주석을 작성할 때처럼 아무데나 주석을 작성하면 그대로 화면상에 출력된다.
+
+
+
+## ESLint와 Prettier 적용하기
+
+### ESLint
+
+ESLint는 문법 검사 도구이고, Prettier는 코드 스타일 자동 정리 도구다.
+
+
+
+## Prettier
+
+JSX를 작성할 때는 코드의 가독성을 위해 들여쓰기를 사용한다.
+
+→ 이러한 스타일을 쉽게 커스터마이징할 수 있다.(Prettier의 장점)
+
+
+
+커스터마이징하기 위해서는 src 하위에 `.prettierrc`라는 파일을 생성한 후 아래와 같이 입력하면 된다.(예시)
+
+> .prettierrc
+
+```
+{
+	"singleQuote": true,
+	"semi": true,
+	"useTabs": false,
+	"tabWidth": 2
+}
+```
+
